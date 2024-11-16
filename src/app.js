@@ -1,28 +1,66 @@
-/* eslint-disable */
-import "bootstrap";
-import "./style.css";
+window.onload = () => {
+  let pronoun = ["El", "La"];
+  let adj = ["gran", "enorme"];
+  let noun = ["corredor", "zapatilla"];
+  let extensions = [".com", ".net", ".us", ".io", ".es"];
 
-import "./assets/img/rigo-baby.jpg";
-import "./assets/img/4geeks.ico";
+  // Arreglo para almacenar todas las combinaciones de dominio
+  let allDomains = [];
+  let currentIndex = 0;
 
-function generateExcuse() {
-  let who = ['Alvaro', 'Hector', 'Adrian', 'Carmen'];
-  let action = ['comió', 'destrozó', 'aplastó', 'rompió'];
-  let what = ['mi tarea', 'mi teléfono', 'el coche'];
-  let when = ['antes de la clase', 'mientras codificaba en bootstrap', 'mientras hacía el generador de excusas', 'durante mi almuerzo', 'mientras rezaba'];
+  // Función para generar todas las combinaciones de dominios usando map y template literals
+  function generateAllDomains() {
+    allDomains = pronoun.reduce((result, p) => {
+      let pronounCombinations = adj.reduce((adjResult, a) => {
+        let adjCombinations = noun.reduce((nounResult, n) => {
+          let nounCombinations = extensions.map((ext) => {
+            // Usamos un template literal directamente aquí
+            return n.endsWith(ext.slice(1))
+              ? `${p}${a}${n.slice(0, -ext.length + 1)}${ext}`
+              : `${p}${a}${n}${ext}`;
+          });
+          return nounResult.concat(nounCombinations);
+        }, []);
+        return adjResult.concat(adjCombinations);
+      }, []);
+      return result.concat(pronounCombinations);
+    }, []);
+  }
 
-  
-  const randomWho = who[Math.floor(Math.random() * who.length)];
-  const randomAction = action[Math.floor(Math.random() * action.length)];
-  const randomWhat = what[Math.floor(Math.random() * what.length)];
-  const randomWhen = when[Math.floor(Math.random() * when.length)];
+  // Función para mostrar el siguiente dominio en la lista
+  function showNextDomain() {
+    // Si no se han generado los dominios aún, llamamos a la función de generación
+    if (allDomains.length === 0) {
+      generateAllDomains();
+    }
 
-  // Concatenar las partes para formar la excusa completa
-  const randomExcuse = `${randomWho} ${randomAction} ${randomWhat} ${randomWhen}`;
+    // Obtener el siguiente dominio basado en el índice
+    let nextDomain = allDomains[currentIndex];
 
-  // Establecer la excusa generada en el elemento HTML con id="excuse"
-  document.getElementById('excuse').innerHTML = randomExcuse;
-}
+    // Crear y añadir un elemento de lista al DOM
+    let domainList = document.getElementById("domainList");
+    let listItem = document.createElement("li");
+    listItem.classList.add(
+      "list-group-item",
+      "justify-content-between",
+      "align-items-center"
+    );
 
+    // Asignar el dominio generado como contenido del elemento
+    listItem.textContent = nextDomain;
 
-window.onload = generateExcuse;
+    // Añadir el elemento de lista al DOM
+    domainList.appendChild(listItem);
+
+    // Actualizar el índice para el siguiente clic
+    currentIndex = (currentIndex + 1) % allDomains.length; // Volver al inicio si llegamos al final
+  }
+
+  // Agregar evento al botón para mostrar el siguiente dominio al hacer clic
+  document
+    .getElementById("generateBtn")
+    .addEventListener("click", showNextDomain);
+
+  // Generar dominios al inicio
+  generateAllDomains();
+};
